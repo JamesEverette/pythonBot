@@ -1,12 +1,39 @@
 import os, slackclient, time
 import random
 import subprocess
+from chatterbot import ChatBot
+from chatterbot.trainers import ListTrainer
+from chatterbot.trainers import ChatterBotCorpusTrainer
+import logging
 
 # slackbot environment variables
 botName = os.environ.get('botName')
 botUserOAuthAccessToken = os.environ.get('botUserOAuthAccessToken')
 botSlackId = os.environ.get('botSlackId')
 botSlackClient = slackclient.SlackClient(botUserOAuthAccessToken)
+
+
+bot = ChatBot("Terminal",
+    #storage_adapter="chatterbot.storage.JsonFileStorageAdapter",
+    storage_adapter='chatterbot.storage.MongoDatabaseAdapter',
+    logic_adapters=[
+        "chatterbot.logic.MathematicalEvaluation",
+        #"chatterbot.logic.TimeLogicAdapter",
+        "chatterbot.logic.BestMatch"
+    ],
+    input_adapter="chatterbot.input.VariableInputTypeAdapter",
+    output_adapter="chatterbot.output.OutputAdapter",
+    output_format="text",
+    #database="database.db"
+    database="chatterbot-database",
+    database_uri='mongodb://localhost:27017/'
+)
+
+
+bot.set_trainer(ChatterBotCorpusTrainer)
+bot.train('chatterbot.corpus.english')
+
+
 
 def run():
     if botSlackClient.rtm_connect():
@@ -27,23 +54,27 @@ def run():
 
 def interpret_message(message, user, channel):
     if hi(message):
+        print('Was hi')
         deliver_message(random.choice(['hi', 'Hi', 'Hello', 'Hey', 'Yo', 'Hiya', 'Herro', 'Heyo', 'Hola', 'Howdy']), channel)
   
-    if bye(message):
+    elif bye(message):
         deliver_message(random.choice(['Bye','Later!','ttyl','Toodles!']), channel)
         
-    if command(message):
+    elif command(message):
         execute_command(message, channel)
+    else:
+        bot_input = bot.get_response(message[13:])
+        deliver_message(str(bot_input), channel)
 
 def hi(message):
     wordList = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'yo', 'hiya', 'herro', 'heyo', 'hola', 'howdy']
-    if any(word in message for word in wordList):
+    if any(word in message.lower() for word in wordList):
         return True
 
 def bye(message):
     wordList = ['bye', 'later', 'ttyl', 'see ya', 'adios', 'toodles',
  'peace out']
-    if any(word in message for word in wordList):
+    if any(word in message.lower() for word in wordList):
         return True
 
 def command(message):
