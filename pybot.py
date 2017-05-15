@@ -63,8 +63,11 @@ def execute_command(message, channel):
         getClaim(message, channel)
 
 def getClaim(message, channel):
+    apiLink = open('apiLink.txt', 'r').read().strip()
+    apiCredentials = open('apiCredentials.txt', 'r').read().strip()
+    print(apiLink)
     claimNumber = message[10:]
-    out = subprocess.check_output(['curl','-u',''+str(claimNumber)])
+    out = subprocess.check_output(['curl','-u', apiCredentials, apiLink + str(claimNumber)])
     deliver_message(out, channel)
 
 if __name__=='__main__':
