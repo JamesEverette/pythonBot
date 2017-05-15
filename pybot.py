@@ -71,13 +71,13 @@ def interpret_message(message, user, channel):
 def hi(message):
     print('is hi')
     wordList = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'yo', 'hiya', 'herro', 'heyo', 'hola', 'howdy']
-    if any(word in message.lower() for word in wordList):
+    if any(word in message.lower().split() for word in wordList):
         return True
 
 def bye(message):
     wordList = ['bye', 'later', 'ttyl', 'see ya', 'adios', 'toodles',
  'peace out']
-    if any(word in message.lower() for word in wordList):
+    if any(word in message.lower().split() for word in wordList):
         return True
 
 def command(message):
