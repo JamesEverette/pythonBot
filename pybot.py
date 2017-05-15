@@ -12,6 +12,7 @@ botUserOAuthAccessToken = os.environ.get('botUserOAuthAccessToken')
 botSlackId = os.environ.get('botSlackId')
 botSlackClient = slackclient.SlackClient(botUserOAuthAccessToken)
 
+logging.basicConfig(level=logging.INFO)
 
 bot = ChatBot("Terminal",
     #storage_adapter="chatterbot.storage.JsonFileStorageAdapter",
@@ -42,7 +43,7 @@ def run():
             eventList = botSlackClient.rtm_read()
             if len(eventList) > 0:
                 for event in eventList:
-                    print(event)
+                    #print(event)
                     #Checks that the message did not come from the bot
                     if (event.get('type')) and (event.get('type') == 'message') and not (event.get('user') == botSlackId):
                         #Checks to see if it was a private message or a message directed '@' the bot
@@ -54,7 +55,6 @@ def run():
 
 def interpret_message(message, user, channel):
     if hi(message):
-        print('Was hi')
         deliver_message(random.choice(['hi', 'Hi', 'Hello', 'Hey', 'Yo', 'Hiya', 'Herro', 'Heyo', 'Hola', 'Howdy']), channel)
   
     elif bye(message):
@@ -63,10 +63,13 @@ def interpret_message(message, user, channel):
     elif command(message):
         execute_command(message, channel)
     else:
-        bot_input = bot.get_response(message[13:])
+        if message.startswith('<'):
+            message = message[13:]
+        bot_input = bot.get_response(message)
         deliver_message(str(bot_input), channel)
 
 def hi(message):
+    print('is hi')
     wordList = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'yo', 'hiya', 'herro', 'heyo', 'hola', 'howdy']
     if any(word in message.lower() for word in wordList):
         return True
