@@ -16,7 +16,7 @@ botSlackId = os.environ.get('botSlackId')
 botSlackClient = slackclient.SlackClient(botUserOAuthAccessToken)
 
 #Uncomment line for logging
-#logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.INFO)
 
 bot = ChatBot("Terminal",
 
@@ -42,6 +42,10 @@ bot = ChatBot("Terminal",
 bot.set_trainer(ChatterBotCorpusTrainer)
 bot.train('chatterbot.corpus.english')
 
+#This is Ubuntu corpus
+#bot.set_trainer(UbuntuCorpusTrainer)
+#bot.train()
+
 
 
 def run():
@@ -66,10 +70,8 @@ def run():
 def interpret_message(message, user, channel):
     if hi(message):
         deliver_message(random.choice(['hi', 'Hi', 'Hello', 'Hey', 'Yo', 'Hiya', 'Heyo', 'Hola', 'Howdy']), channel)
-  
     elif bye(message):
         deliver_message(random.choice(['Bye','Later!','ttyl','Toodles!']), channel)
-        
     elif command(message):
         execute_command(message, channel)
     else:
@@ -78,20 +80,20 @@ def interpret_message(message, user, channel):
         bot_input = bot.get_response(message)
         deliver_message(str(bot_input), channel)
 
-def hi(message):
+
+def checkList(message, wordList):
     if message.startswith('<'):
         message = message[13:]
-    wordList = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'yo', 'hiya', 'herro', 'heyo', 'hola', 'howdy']
     if any(word in message.lower().split() for word in wordList) or message.lower() in wordList:
         return True
 
+def hi(message):
+    wordList = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'yo', 'hiya', 'herro', 'heyo', 'hola', 'howdy']
+    return checkList(message, wordList)
+
 def bye(message):
-    if message.startswith('<'):
-        message = message[13:]
-    wordList = ['bye', 'later', 'ttyl', 'see ya', 'adios', 'toodles',
- 'peace out']
-    if any(word in message.lower().split() for word in wordList) or message.lower() in wordList:
-        return True
+    wordList = ['bye', 'later', 'ttyl', 'see ya', 'adios', 'toodles', 'peace out']
+    return checkList(message, wordList)
 
 def command(message):
     if message.startswith('<'):
@@ -108,6 +110,8 @@ def execute_command(message, channel):
         message = message[13:]
     if message.lower().startswith('get claim'):
         getClaim(message, channel)
+    if message.lower().startswith('get crash'):
+        getCrash(message, channel)
 
 def getClaim(message, channel):
     apiLink = open('apiLink.txt', 'r').read().strip()
@@ -116,6 +120,7 @@ def getClaim(message, channel):
     claimNumber = message[10:]
     out = subprocess.check_output(['curl','-u', apiCredentials, apiLink + str(claimNumber)])
     deliver_message(out, channel)
+    
 
 if __name__=='__main__':
     run()
