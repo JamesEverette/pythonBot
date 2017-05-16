@@ -6,6 +6,8 @@ from chatterbot.trainers import ListTrainer
 from chatterbot.trainers import ChatterBotCorpusTrainer
 from chatterbot.trainers import UbuntuCorpusTrainer
 import logging
+import boto3
+from boto3.dynamodb.conditions import Key, Attr
 
 # slackbot environment variables
 botName = os.environ.get('botName')
@@ -63,7 +65,7 @@ def run():
 #Otherwise, it passes it off to chatterbot.
 def interpret_message(message, user, channel):
     if hi(message):
-        deliver_message(random.choice(['hi', 'Hi', 'Hello', 'Hey', 'Yo', 'Hiya', 'Herro', 'Heyo', 'Hola', 'Howdy']), channel)
+        deliver_message(random.choice(['hi', 'Hi', 'Hello', 'Hey', 'Yo', 'Hiya', 'Heyo', 'Hola', 'Howdy']), channel)
   
     elif bye(message):
         deliver_message(random.choice(['Bye','Later!','ttyl','Toodles!']), channel)
@@ -77,14 +79,18 @@ def interpret_message(message, user, channel):
         deliver_message(str(bot_input), channel)
 
 def hi(message):
+    if message.startswith('<'):
+        message = message[13:]
     wordList = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'yo', 'hiya', 'herro', 'heyo', 'hola', 'howdy']
-    if any(word in message.lower().split() for word in wordList):
+    if any(word in message.lower().split() for word in wordList) or message.lower() in wordList:
         return True
 
 def bye(message):
+    if message.startswith('<'):
+        message = message[13:]
     wordList = ['bye', 'later', 'ttyl', 'see ya', 'adios', 'toodles',
  'peace out']
-    if any(word in message.lower().split() for word in wordList):
+    if any(word in message.lower().split() for word in wordList) or message.lower() in wordList:
         return True
 
 def command(message):
