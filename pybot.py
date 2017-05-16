@@ -4,6 +4,7 @@ import subprocess
 from chatterbot import ChatBot
 from chatterbot.trainers import ListTrainer
 from chatterbot.trainers import ChatterBotCorpusTrainer
+from chatterbot.trainers import UbuntuCorpusTrainer
 import logging
 
 # slackbot environment variables
@@ -12,25 +13,30 @@ botUserOAuthAccessToken = os.environ.get('botUserOAuthAccessToken')
 botSlackId = os.environ.get('botSlackId')
 botSlackClient = slackclient.SlackClient(botUserOAuthAccessToken)
 
-logging.basicConfig(level=logging.INFO)
+#Uncomment line for logging
+#logging.basicConfig(level=logging.INFO)
 
 bot = ChatBot("Terminal",
+
+    #Following line stores data as json, instead of running a mongodb. Slow.
     #storage_adapter="chatterbot.storage.JsonFileStorageAdapter",
     storage_adapter='chatterbot.storage.MongoDatabaseAdapter',
     logic_adapters=[
         "chatterbot.logic.MathematicalEvaluation",
-        #"chatterbot.logic.TimeLogicAdapter",
+        "chatterbot.logic.TimeLogicAdapter",
         "chatterbot.logic.BestMatch"
     ],
     input_adapter="chatterbot.input.VariableInputTypeAdapter",
     output_adapter="chatterbot.output.OutputAdapter",
     output_format="text",
+    #For the json database
     #database="database.db"
     database="chatterbot-database",
     database_uri='mongodb://localhost:27017/'
 )
 
 
+#This trains the bot using chatterbot's english corpus trainer
 bot.set_trainer(ChatterBotCorpusTrainer)
 bot.train('chatterbot.corpus.english')
 
@@ -53,6 +59,8 @@ def run():
     else:
         print('! Connection failed !')
 
+#Checks if the message is something specific I want my bot to respond to.
+#Otherwise, it passes it off to chatterbot.
 def interpret_message(message, user, channel):
     if hi(message):
         deliver_message(random.choice(['hi', 'Hi', 'Hello', 'Hey', 'Yo', 'Hiya', 'Herro', 'Heyo', 'Hola', 'Howdy']), channel)
@@ -69,7 +77,6 @@ def interpret_message(message, user, channel):
         deliver_message(str(bot_input), channel)
 
 def hi(message):
-    print('is hi')
     wordList = ['hi', 'hello', 'hey', 'good morning', 'good afternoon', 'good evening', 'yo', 'hiya', 'herro', 'heyo', 'hola', 'howdy']
     if any(word in message.lower().split() for word in wordList):
         return True
