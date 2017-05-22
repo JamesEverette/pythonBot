@@ -1,10 +1,9 @@
 from chatterBot import getChatterResponse
+from witBot import getWitResponse
 import os, slackclient, time
 import random
 import subprocess
 import logging
-import boto3
-from boto3.dynamodb.conditions import Key, Attr
 
 # slackbot environment variables
 botName = os.environ.get('botName')
@@ -42,7 +41,15 @@ def interpret_message(message, user, channel):
         if message.startswith('<'):
             message = message[13:]
         chatterResponse, chatterConfidence = getChatterResponse(message)
-        deliver_message(str(chatterResponse), channel)
+        witResponse, witConfidence, witEntity = getWitResponse(message)
+
+        #print('chatterBot Confidence: '+str(chatterConfidence))
+        #print('witBot Confidence: '+str(witConfidence))
+
+        if (chatterConfidence > witConfidence):
+        	deliver_message(str(chatterResponse), channel)
+        else:
+        	deliver_message(str(witResponse), channel)
 
 def checkList(message, wordList):
     if message.startswith('<'):
