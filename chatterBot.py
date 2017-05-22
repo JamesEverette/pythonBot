@@ -6,7 +6,7 @@ from chatterbot.trainers import UbuntuCorpusTrainer
 import logging
 
 #Uncomment line for logging
-logging.basicConfig(level=logging.INFO)
+#logging.basicConfig(level=logging.INFO)
 
 bot = ChatBot("Terminal",
 
@@ -38,4 +38,4 @@ def getChatterResponse(message_text):
 	response = bot.get_response(message_text)
 	return response.text, response.confidence
 
-print(getChatterResponse('hi'))
+#print(getChatterResponse('hi'))
