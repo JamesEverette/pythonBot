@@ -41,18 +41,14 @@ def interpret_message(message, user, channel):
     else:
         if message.startswith('<'):
             message = message[13:]
+        #Grab the confidence levels of the two bots for comparison
         chatterResponse, chatterConfidence = getChatterResponse(message)
         witValues, witConfidence= getWitResponse(message)
 
         print('chatterBot Confidence: '+str(chatterConfidence))
         print('witBot Confidence: '+str(witConfidence))
 
-        # if (chatterConfidence > witConfidence):
-        #     #deliver_message(str(chatterResponse), channel)
-        #     deliver_message('From chatterBot: '+str(chatterResponse), channel)
-        # else:
-        #     #deliver_message(str(witResponse), channel)
-        #     deliver_message('From witBot: '+str(witResponse), channel)
+        #If witAi is confident in its interpretation, then we go with that
         if(witConfidence > .6):
             witInterpret(witValues, channel)
         else:
@@ -100,10 +96,10 @@ def getClaim(message, channel):
     out = subprocess.check_output(['curl','-u', apiCredentials, apiLink + str(claimNumber)])
     deliver_message(out, channel)
 
-def witInterpret(witValues, channel):
-    print(witValues)
-    
 
+#Process the variables to pass on to be queried
+def witInterpret(witValues, channel):
+    
     for element in witValues:
         if str(element) == 'policyNumber':
             policyNumber = witValues[str(element)]
@@ -111,14 +107,9 @@ def witInterpret(witValues, channel):
             policyField = witValues[str(element)]
             
     policyInfo = queryPolicyTable(policyNumber, policyField)
-    deliver_message('From witBot: '+str(policyInfo), channel)
 
-    # if witEntity == 'policyNumber':
-    #     policyInfo = queryPolicyTable(witResponse, witEntity)
-    #     deliver_message('From witBot: '+str(policyInfo), channel)
-    # else:
-    #     deliver_message('From witBot: Policy does not exist.', channel)
-    
+    #Deliver the result of the query
+    deliver_message('From witBot: '+str(policyInfo), channel)    
 
 if __name__=='__main__':
     run()

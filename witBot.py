@@ -9,6 +9,7 @@ client = Wit(witAccessToken)
 def getWitResponse(message_text):
 	response = client.message(message_text)
 	
+	#Returns a dictionary of entities and their values, as well as confidence level
 	try:
 		entityValueList = {}
 		
@@ -29,7 +30,5 @@ def getWitResponse(message_text):
 
 	except:
 		return (None, None)
-
-
-
+		
 # result = getWitResponse("Show me policy number 2 premium")
