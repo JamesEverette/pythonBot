@@ -1,5 +1,6 @@
 from chatterBot import getChatterResponse
 from witBot import getWitResponse
+from msSqlTestLocal import queryPolicyTable
 import os, slackclient, time
 import random
 import subprocess
@@ -41,15 +42,23 @@ def interpret_message(message, user, channel):
         if message.startswith('<'):
             message = message[13:]
         chatterResponse, chatterConfidence = getChatterResponse(message)
-        witResponse, witConfidence, witEntity = getWitResponse(message)
+        witValues, witConfidence= getWitResponse(message)
 
-        #print('chatterBot Confidence: '+str(chatterConfidence))
-        #print('witBot Confidence: '+str(witConfidence))
+        print('chatterBot Confidence: '+str(chatterConfidence))
+        print('witBot Confidence: '+str(witConfidence))
 
-        if (chatterConfidence > witConfidence):
-        	deliver_message(str(chatterResponse), channel)
+        # if (chatterConfidence > witConfidence):
+        #     #deliver_message(str(chatterResponse), channel)
+        #     deliver_message('From chatterBot: '+str(chatterResponse), channel)
+        # else:
+        #     #deliver_message(str(witResponse), channel)
+        #     deliver_message('From witBot: '+str(witResponse), channel)
+        if(witConfidence > .6):
+            witInterpret(witValues, channel)
         else:
-        	deliver_message(str(witResponse), channel)
+            deliver_message('From chatterBot: '+str(chatterResponse), channel)
+            
+
 
 def checkList(message, wordList):
     if message.startswith('<'):
@@ -90,6 +99,25 @@ def getClaim(message, channel):
     claimNumber = message[10:]
     out = subprocess.check_output(['curl','-u', apiCredentials, apiLink + str(claimNumber)])
     deliver_message(out, channel)
+
+def witInterpret(witValues, channel):
+    print(witValues)
+    
+
+    for element in witValues:
+        if str(element) == 'policyNumber':
+            policyNumber = witValues[str(element)]
+        if str(element) == 'policyField':
+            policyField = witValues[str(element)]
+            
+    policyInfo = queryPolicyTable(policyNumber, policyField)
+    deliver_message('From witBot: '+str(policyInfo), channel)
+
+    # if witEntity == 'policyNumber':
+    #     policyInfo = queryPolicyTable(witResponse, witEntity)
+    #     deliver_message('From witBot: '+str(policyInfo), channel)
+    # else:
+    #     deliver_message('From witBot: Policy does not exist.', channel)
     
 
 if __name__=='__main__':

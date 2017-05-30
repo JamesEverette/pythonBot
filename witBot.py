@@ -1,4 +1,5 @@
 from wit import Wit
+#from msSqlTestLocal import queryPolicyTable
 import os
 
 witAccessToken = os.environ.get('witAccessToken')
@@ -7,19 +8,28 @@ client = Wit(witAccessToken)
 
 def getWitResponse(message_text):
 	response = client.message(message_text)
-	#confidence = list(response['confidence'])[0]
-	#print('entity------- '+confidence)
+	
 	try:
-		entity = list(response['entities'])[0]
+		entityValueList = {}
 		
-		value = response['entities'][entity][0]['value']
+		entityList = list(response['entities'])
 
+		# Need to add a confidence average
+		entity = list(response['entities'])[0]
+		#print(response['entities'][entity][0]['confidence'])
 		confidence = response['entities'][entity][0]['confidence']
 
-		return (value, confidence, entity)
+		for element in entityList:
+			#print(element)
+			#print(response['entities'][element][0]['value'])
+			entityValueList[str(element)] = response['entities'][element][0]['value']
+			#values = valueList.append(response['entities'][element][0]['value'])
+
+		return (entityValueList, confidence)
+
 	except:
-		return (None, None, None)
+		return (None, None)
 
-print(getWitResponse("Show me sports 1"))
 
-#print(        list(client.message('show me sports news'))['confidence'] [0]       )
+
+# result = getWitResponse("Show me policy number 2 premium")
