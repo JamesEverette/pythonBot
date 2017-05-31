@@ -52,7 +52,7 @@ def interpret_message(message, user, channel):
         if(witConfidence > .6):
             witInterpret(witValues, channel)
         else:
-            deliver_message('From chatterBot: '+str(chatterResponse), channel)
+            deliver_message(str(chatterResponse), channel)
             
 
 
@@ -92,8 +92,10 @@ def getClaim(message, channel):
     apiLink = open('apiLink.txt', 'r').read().strip()
     apiCredentials = open('apiCredentials.txt', 'r').read().strip()
     print(apiLink)
+    print(apiCredentials)
     claimNumber = message[10:]
     out = subprocess.check_output(['curl','-u', apiCredentials, apiLink + str(claimNumber)])
+
     deliver_message(out, channel)
 
 
@@ -109,7 +111,7 @@ def witInterpret(witValues, channel):
     policyInfo = queryPolicyTable(policyNumber, policyField)
 
     #Deliver the result of the query
-    deliver_message('From witBot: '+str(policyInfo), channel)    
+    deliver_message(str(policyInfo), channel)    
 
 if __name__=='__main__':
     run()
