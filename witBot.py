@@ -57,4 +57,4 @@ def getWitResponse(message_text):
 	except:
 		return (None)
 
-print(getWitResponse('Show me premium and account number of policy number 3'))
+#print(getWitResponse('Show me premium and account number of policy number 3'))
