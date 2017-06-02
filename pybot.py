@@ -1,6 +1,6 @@
 from chatterBot import getChatterResponse
-from witBot import getWitResponse
-from msSqlTestLocal import queryPolicyTable
+from witQuery import getWitResponse
+from msSqlQuery import queryPolicyTable
 import os, slackclient, time
 import random
 import subprocess
@@ -43,14 +43,14 @@ def interpret_message(message, user, channel):
             message = message[13:]
         #Grab the confidence levels of the two bots for comparison
         chatterResponse, chatterConfidence = getChatterResponse(message)
-        witValues, witConfidence= getWitResponse(message)
+        queryFields, whereValues, witConfidence = getWitResponse(message)
 
-        print('chatterBot Confidence: '+str(chatterConfidence))
-        print('witBot Confidence: '+str(witConfidence))
+        #print('chatterBot Confidence: '+str(chatterConfidence))
+        #print('witBot Confidence: '+str(witConfidence))
 
         #If witAi is confident in its interpretation, then we go with that
         if(witConfidence > .6):
-            witInterpret(witValues, channel)
+            witInterpret(queryFields, whereValues, channel)
         else:
             deliver_message(str(chatterResponse), channel)
             
@@ -91,8 +91,8 @@ def execute_command(message, channel):
 def getClaim(message, channel):
     apiLink = open('apiLink.txt', 'r').read().strip()
     apiCredentials = open('apiCredentials.txt', 'r').read().strip()
-    print(apiLink)
-    print(apiCredentials)
+    #print(apiLink)
+    #print(apiCredentials)
     claimNumber = message[10:]
     out = subprocess.check_output(['curl','-u', apiCredentials, apiLink + str(claimNumber)])
 
@@ -100,18 +100,22 @@ def getClaim(message, channel):
 
 
 #Process the variables to pass on to be queried
-def witInterpret(witValues, channel):
+def witInterpret(queryFields, whereValues, channel):
+
+    # print(witValues)
+    result = queryPolicyTable(queryFields, whereValues)
+    print(result)
     
-    for element in witValues:
-        if str(element) == 'policyNumber':
-            policyNumber = witValues[str(element)]
-        if str(element) == 'policyField':
-            policyField = witValues[str(element)]
+    # for element in witValues:
+    #     if str(element) == 'policyNumber':
+    #         policyNumber = witValues[str(element)]
+    #     if str(element) == 'policyField':
+    #         policyField = witValues[str(element)]
             
-    policyInfo = queryPolicyTable(policyNumber, policyField)
+    # policyInfo = queryPolicyTable(policyNumber, policyField)
 
     #Deliver the result of the query
-    deliver_message(str(policyInfo), channel)    
+    deliver_message(str(result), channel)
 
 if __name__=='__main__':
     run()
