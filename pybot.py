@@ -1,5 +1,5 @@
 from chatterBot import getChatterResponse
-from witQuery import getWitResponse
+from witBot import getWitResponse
 from msSqlQuery import queryPolicyTable
 import os, slackclient, time
 import random
